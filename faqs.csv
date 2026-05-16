@@ -1,0 +1,11 @@
+Question,Answer,Intent
+"How can I reset my password?","You can reset your password by clicking on 'Forgot Password' on the login page.",Login Problem
+"My account is locked, what should I do?","If your account is locked, please wait 30 minutes or contact human support.",Login Problem
+"I was charged twice for my order.","We apologize. Please provide your order ID, and we will initiate a refund for the duplicate charge.",Payment Issue
+"My payment is failing.","Ensure your card has sufficient balance or try another payment method.",Payment Issue
+"Where is my refund?","Refunds typically take 5-7 business days to reflect in your account.",Refund Request
+"Can I cancel and get a refund?","Yes, if the order hasn't shipped, you can cancel it from your dashboard for a full refund.",Refund Request
+"My delivery is delayed.","We are experiencing high volumes. Please track your order using the link sent to your email.",Delivery Delay
+"When will my order arrive?","Standard shipping takes 3-5 days. Check your tracking link for real-time updates.",Delivery Delay
+"What are your working hours?","Our support team is available 24/7.",General Query
+"Do you ship internationally?","Currently, we only ship within the country.",General Query
