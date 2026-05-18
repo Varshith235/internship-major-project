@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
 class FAQRetriever:
-    def __init__(self, data_path='faqs.csv'):
+    def __init__(self, data_path='data/faqs.csv'):
         """Initializes the TF-IDF vectorizer and loads the FAQ dataset."""
         self.df = pd.read_csv(data_path)
         self.questions = self.df['Question'].tolist()
