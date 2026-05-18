@@ -2,19 +2,24 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import database
 
 class FAQRetriever:
-    def __init__(self, data_path='data/faqs.csv'):
-        """Initializes the TF-IDF vectorizer and loads the FAQ dataset."""
-        self.df = pd.read_csv(data_path)
-        self.questions = self.df['Question'].tolist()
-        self.answers = self.df['Answer'].tolist()
+    def __init__(self):
+        """Initializes the TF-IDF vectorizer and loads the FAQ dataset from the SQLite DB."""
+        self.retrain()
         
-        # Build the index using TF-IDF
-        self._build_index()
+    def retrain(self):
+        """Fetches the latest knowledge from the database and rebuilds the TF-IDF matrix."""
+        self.df = database.get_knowledge_base()
         
-    def _build_index(self):
-        """Encodes all FAQ questions using TF-IDF."""
+        if self.df.empty:
+            self.questions = ["Placeholder Question"]
+            self.answers = ["I am still learning. Please check back later."]
+        else:
+            self.questions = self.df['question'].tolist()
+            self.answers = self.df['answer'].tolist()
+            
         self.vectorizer = TfidfVectorizer()
         # Fit and transform the questions into a TF-IDF matrix
         self.question_vectors = self.vectorizer.fit_transform(self.questions)

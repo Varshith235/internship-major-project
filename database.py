@@ -39,6 +39,16 @@ def init_db():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Create Knowledge Base table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS knowledge_base (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question TEXT UNIQUE,
+            answer TEXT,
+            intent TEXT DEFAULT 'General Query'
+        )
+    ''')
     
     conn.commit()
     conn.close()
@@ -58,6 +68,7 @@ def seed_database():
         except sqlite3.IntegrityError:
             pass # Already exists
             
+    # Seed Interactions
     cursor.execute("SELECT COUNT(*) FROM interactions")
     if cursor.fetchone()[0] == 0:
         print("Seeding database with initial data...")
@@ -77,6 +88,26 @@ def seed_database():
                 INSERT INTO interactions (username, user_query, predicted_intent, chatbot_response, escalated, admin_response, helpful, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', ("demo_user", q, i, r, e, a_resp, h, random_time.strftime("%Y-%m-%d %H:%M:%S")))
+
+    # Seed Knowledge Base
+    cursor.execute("SELECT COUNT(*) FROM knowledge_base")
+    if cursor.fetchone()[0] == 0:
+        faq_path = 'data/faqs.csv'
+        if os.path.exists(faq_path):
+            df = pd.read_csv(faq_path)
+            for _, row in df.iterrows():
+                try:
+                    cursor.execute('INSERT INTO knowledge_base (question, answer, intent) VALUES (?, ?, ?)',
+                                   (row['Question'], row['Answer'], row['Intent']))
+                except sqlite3.IntegrityError:
+                    pass
+        else:
+            faqs = [
+                ("How can I reset my password?", "You can reset your password by clicking on 'Forgot Password'.", "Login Problem"),
+                ("Where is my refund?", "Refunds typically take 5-7 business days.", "Refund Request")
+            ]
+            for q, a, i in faqs:
+                cursor.execute('INSERT INTO knowledge_base (question, answer, intent) VALUES (?, ?, ?)', (q, a, i))
     
     conn.commit()
     conn.close()
@@ -186,6 +217,26 @@ def get_previous_admin_answer(query):
     if result:
         return result[0]
     return None
+
+def get_knowledge_base():
+    """Returns the entire knowledge base as a DataFrame."""
+    conn = sqlite3.connect(DB_PATH)
+    df = pd.read_sql_query("SELECT * FROM knowledge_base", conn)
+    conn.close()
+    return df
+
+def add_knowledge(question, answer, intent="General Query"):
+    """Adds a new fact to the knowledge base."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute('INSERT INTO knowledge_base (question, answer, intent) VALUES (?, ?, ?)', (question, answer, intent))
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
 
 # --- METRICS ---
 def get_metrics():
